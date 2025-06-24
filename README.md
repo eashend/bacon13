@@ -78,7 +78,7 @@ A social media application built with Go microservices backend, Flutter frontend
 1. **Clone and Setup**
    ```bash
    git clone <your-repo>
-   cd instagram-clone
+   cd seenme
    chmod +x deploy.sh
    ```
 
