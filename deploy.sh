@@ -6,11 +6,11 @@
 set -e
 
 # Configuration
-PROJECT_ID=${1:-"seenem"}
+PROJECT_ID=${1:-"seenme"}
 REGION=${2:-"us-central1"}
 ENVIRONMENT=${3:-"dev"}
 
-echo "Deploying Seenem App to Cloud Run..."
+echo "Deploying Seenme App to Cloud Run..."
 echo "Project ID: $PROJECT_ID"
 echo "Region: $REGION"
 echo "Environment: $ENVIRONMENT"
@@ -78,7 +78,7 @@ for SERVICE in "${SERVICES[@]}"; do
         --memory 512Mi \
         --cpu 1 \
         --max-instances 10 \
-        --set-cloudsql-instances $PROJECT_ID:$REGION:seenem-app-$ENVIRONMENT \
+        --set-cloudsql-instances $PROJECT_ID:$REGION:seenme-app-$ENVIRONMENT \
         --set-env-vars "PROJECT_ID=$PROJECT_ID,ENVIRONMENT=$ENVIRONMENT"
 done
 

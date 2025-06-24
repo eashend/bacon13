@@ -17,7 +17,7 @@ provider "google" {
 variable "project_id" {
   description = "The GCP project ID"
   type        = string
-  default     = "seenem"
+  default     = "seenme"
 }
 
 variable "region" {
@@ -51,7 +51,7 @@ resource "google_project_service" "required_apis" {
 
 # Cloud SQL instance for PostgreSQL
 resource "google_sql_database_instance" "main" {
-  name             = "seenem-app-${var.environment}"
+  name             = "seenme-app-${var.environment}"
   database_version = "POSTGRES_15"
   region           = var.region
   deletion_protection = false
@@ -77,7 +77,7 @@ resource "google_sql_database_instance" "main" {
 }
 
 resource "google_sql_database" "database" {
-  name     = "seenem_app"
+  name     = "seenme_app"
   instance = google_sql_database_instance.main.name
 }
 
@@ -89,7 +89,7 @@ resource "google_sql_user" "user" {
 
 # Cloud Storage bucket for image uploads
 resource "google_storage_bucket" "images_bucket" {
-  name     = "seenem-app-images-${var.project_id}-${var.environment}"
+  name     = "seenme-app-images-${var.project_id}-${var.environment}"
   location = var.region
   
   uniform_bucket_level_access = true
@@ -114,8 +114,8 @@ resource "google_storage_bucket_iam_binding" "images_bucket_public_read" {
 
 # Service Account for Cloud Run services
 resource "google_service_account" "cloud_run_sa" {
-  account_id   = "seenem-cloud-run-sa"
-  display_name = "Seenem App Cloud Run Service Account"
+  account_id   = "seenme-cloud-run-sa"
+  display_name = "Seenme App Cloud Run Service Account"
   
   depends_on = [google_project_service.required_apis]
 }
