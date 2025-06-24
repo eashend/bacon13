@@ -1,4 +1,4 @@
-# Seenme App - Cloud Run Deployment
+# Bacon13 App - Cloud Run Deployment
 
 A social media application built with Go microservices backend, Flutter frontend, deployed on Google Cloud Run.
 
@@ -78,7 +78,7 @@ A social media application built with Go microservices backend, Flutter frontend
 1. **Clone and Setup**
    ```bash
    git clone <your-repo>
-   cd seenme
+   cd bacon13
    chmod +x deploy.sh
    ```
 
@@ -167,11 +167,11 @@ The services use these environment variables (automatically set by Terraform):
 ### 1. Database Setup
 ```bash
 # Start local PostgreSQL (using Docker)
-docker run --name postgres-dev -e POSTGRES_PASSWORD=password -e POSTGRES_DB=seenme_app -p 5432:5432 -d postgres:15
+docker run --name postgres-dev -e POSTGRES_PASSWORD=password -e POSTGRES_DB=bacon13_app -p 5432:5432 -d postgres:15
 
 # Set local environment variables
 export DB_HOST=localhost:5432
-export DB_NAME=seenme_app
+export DB_NAME=bacon13_app
 export DB_USER=postgres
 export DB_PASSWORD=password
 export STORAGE_BUCKET=your-bucket-name

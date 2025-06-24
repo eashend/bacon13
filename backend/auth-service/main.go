@@ -15,7 +15,7 @@ import (
 	"github.com/rs/cors"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/seenme/shared"
+	"github.com/bacon13/shared"
 )
 
 var (

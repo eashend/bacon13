@@ -1,4 +1,4 @@
-module github.com/seenme/shared
+module github.com/bacon13/shared
 
 go 1.21
 
