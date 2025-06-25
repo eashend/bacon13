@@ -7,7 +7,7 @@
     "rules": "storage.rules"
   },
   "hosting": {
-    "public": "frontend/build",
+    "public": "flutter_app/build/web",
     "ignore": [
       "firebase.json",
       "**/.*",

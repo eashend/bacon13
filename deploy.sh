@@ -10,7 +10,7 @@ PROJECT_ID=${1:-"bacon13"}
 REGION=${2:-"us-central1"}
 ENVIRONMENT=${3:-"dev"}
 
-echo "Deploying Bacon13 App (Frontend-Only Firebase Architecture)..."
+echo "Deploying Bacon13 App (Flutter + Firebase Architecture)..."
 echo "Project ID: $PROJECT_ID"
 echo "Region: $REGION"
 echo "Environment: $ENVIRONMENT"
@@ -63,20 +63,19 @@ firebase deploy --only firestore:rules
 echo "Deploying Firebase Storage security rules..."
 firebase deploy --only storage
 
-# Build and deploy frontend
-echo "Building and deploying frontend..."
-cd frontend
+# Build and deploy Flutter web app
+echo "Building and deploying Flutter web app..."
+cd flutter_app
 
 # Install dependencies
-npm install
+flutter pub get
 
-# Build the React app
-npm run build
+# Build the Flutter web app
+flutter build web
 
 # Deploy to Firebase Hosting
-firebase deploy --only hosting
-
 cd ..
+firebase deploy --only hosting
 
 echo ""
 echo "Deployment completed!"
