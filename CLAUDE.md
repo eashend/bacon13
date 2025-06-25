@@ -9,10 +9,10 @@ Bacon13 is a social media application with a Go microservices backend and React 
 ## Architecture
 
 **Backend**: Go microservices architecture with shared models
-- `auth-service` (port 8081): JWT authentication, user registration/login
+- `auth-service` (port 8081): Firebase Auth token verification and user profile management
 - `user-service` (port 8080): User profiles and profile image management  
 - `post-service` (port 8082): Image post creation and feeds
-- `shared/`: Common database models, database connection, and API response types
+- `shared/`: Common database models, Firestore/Firebase Auth utilities, and API response types
 
 **Frontend**: React TypeScript with Tailwind CSS
 - Uses React Router for navigation
@@ -83,20 +83,22 @@ terraform apply
 ## Key Components
 
 ### Firestore Collections
-- `users`: User documents with id, email, password_hash, profile_images array, timestamps
-- `posts`: Post documents with id, user_id, image_url, timestamps
-- Uses UUID strings as document IDs for consistency
+- `users`: User documents with Firebase UID as ID, email, profile_images array, timestamps
+- `posts`: Post documents with UUID as ID, user_id (Firebase UID), image_url, timestamps
+- Users use Firebase UID strings as document IDs, posts use UUID strings
 
 ### Authentication Flow
-- JWT tokens with 7-day expiration
-- bcrypt password hashing
-- Token validation middleware in shared package
+- Firebase Authentication for user registration/login
+- Firebase ID tokens for API authentication
+- Server-side token verification using Firebase Admin SDK
+- Automatic user profile creation in Firestore on first login
 - Bearer token format for API requests
 
 ### Shared Package
 Contains common types and database utilities:
 - `models.go`: User, Post, request/response structs with Firestore tags
 - `database.go`: Firestore client initialization and connection management
+- `firebase_auth.go`: Firebase Auth utilities for token verification and user management
 - Uses Firestore native mode for real-time capabilities
 
 ### Service Communication

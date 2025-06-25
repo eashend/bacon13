@@ -39,6 +39,8 @@ resource "google_project_service" "required_apis" {
     "cloudbuild.googleapis.com",
     "containerregistry.googleapis.com",
     "firestore.googleapis.com",
+    "firebase.googleapis.com",
+    "identitytoolkit.googleapis.com",
     "storage.googleapis.com"
   ])
   

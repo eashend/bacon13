@@ -7,9 +7,8 @@ import (
 
 // User represents a user in the system
 type User struct {
-	ID             uuid.UUID  `json:"id" firestore:"id"`
+	ID             string     `json:"id" firestore:"id"`                 // Firebase UID
 	Email          string     `json:"email" firestore:"email"`
-	PasswordHash   string     `json:"-" firestore:"password_hash"`
 	CreatedAt      time.Time  `json:"created_at" firestore:"created_at"`
 	UpdatedAt      time.Time  `json:"updated_at" firestore:"updated_at"`
 	ProfileImages  []string   `json:"profile_images" firestore:"profile_images"`
@@ -18,7 +17,7 @@ type User struct {
 // Post represents an image post
 type Post struct {
 	ID        uuid.UUID `json:"id" firestore:"id"`
-	UserID    uuid.UUID `json:"user_id" firestore:"user_id"`
+	UserID    string    `json:"user_id" firestore:"user_id"`        // Firebase UID
 	ImageURL  string    `json:"image_url" firestore:"image_url"`
 	CreatedAt time.Time `json:"created_at" firestore:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" firestore:"updated_at"`
@@ -38,7 +37,7 @@ type UserLoginRequest struct {
 
 // AuthResponse represents the response after successful authentication
 type AuthResponse struct {
-	Token string `json:"token"`
+	Token string `json:"token"`  // Firebase ID token
 	User  User   `json:"user"`
 }
 

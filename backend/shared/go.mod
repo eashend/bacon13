@@ -3,9 +3,8 @@ module github.com/bacon13/shared
 go 1.21
 
 require (
-	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/uuid v1.4.0
 	cloud.google.com/go/storage v1.33.0
 	cloud.google.com/go/firestore v1.14.0
-	golang.org/x/crypto v0.17.0
+	firebase.google.com/go/v4 v4.12.0
 )

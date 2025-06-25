@@ -32,9 +32,9 @@ A social media application built with Go microservices backend, Flutter frontend
 ## Services
 
 ### Auth Service (Port 8081)
-- User registration and login
-- JWT token generation and validation
-- Password hashing with bcrypt
+- Firebase Auth token verification
+- User profile management in Firestore
+- Automatic user profile creation on first login
 
 ### User Service (Port 8080)
 - User profile management
@@ -52,7 +52,19 @@ A social media application built with Go microservices backend, Flutter frontend
    - Create a GCP project
    - Enable billing
 
-2. **Required Tools**
+2. **Firebase Setup**
+   ```bash
+   # Install Firebase CLI
+   npm install -g firebase-tools
+   
+   # Login to Firebase
+   firebase login
+   
+   # Initialize Firebase in your project
+   firebase init
+   ```
+
+3. **Required Tools**
    ```bash
    # Install Google Cloud CLI
    # https://cloud.google.com/sdk/docs/install
@@ -64,7 +76,7 @@ A social media application built with Go microservices backend, Flutter frontend
    # https://golang.org/doc/install
    ```
 
-3. **Authentication**
+4. **Authentication**
    ```bash
    # Authenticate with Google Cloud
    gcloud auth login
@@ -127,9 +139,9 @@ gcloud run deploy auth-service \
 
 ### Auth Service
 ```
-POST /register - User registration
-POST /login - User login
-GET /verify - Token verification
+POST /verify - Firebase ID token verification
+GET /profile - Get user profile (requires auth)
+PUT /profile - Update user profile (requires auth)
 GET /health - Health check
 ```
 
@@ -256,7 +268,8 @@ Cloud Run automatically scales based on traffic:
    - Verify Go modules are properly configured
 
 4. **Authentication Issues**
-   - Verify JWT secret is set
-   - Check token format and expiration
+   - Verify Firebase project configuration
+   - Check Firebase ID token validity and expiration
+   - Ensure Firebase Auth is enabled in GCP project
 
 For more help, check the Cloud Run documentation: https://cloud.google.com/run/docs
