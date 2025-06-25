@@ -47,27 +47,27 @@ class DefaultFirebaseOptions {
     apiKey: 'your-web-api-key',
     appId: '1:123456789:web:abcdef',
     messagingSenderId: '123456789',
-    projectId: 'your-project-id',
-    authDomain: 'your-project.firebaseapp.com',
-    storageBucket: 'your-project.appspot.com',
+    projectId: 'bacon13',
+    authDomain: 'bacon13.firebaseapp.com',
+    storageBucket: 'bacon13.appspot.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'your-android-api-key',
     appId: '1:123456789:android:abcdef',
     messagingSenderId: '123456789',
-    projectId: 'your-project-id',
-    authDomain: 'your-project.firebaseapp.com',
-    storageBucket: 'your-project.appspot.com',
+    projectId: 'bacon13',
+    authDomain: 'bacon13.firebaseapp.com',
+    storageBucket: 'bacon13.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'your-ios-api-key',
     appId: '1:123456789:ios:abcdef',
     messagingSenderId: '123456789',
-    projectId: 'your-project-id',
-    authDomain: 'your-project.firebaseapp.com',
-    storageBucket: 'your-project.appspot.com',
+    projectId: 'bacon13',
+    authDomain: 'bacon13.firebaseapp.com',
+    storageBucket: 'bacon13.appspot.com',
     iosBundleId: 'com.example.bacon13',
   );
 
@@ -75,9 +75,9 @@ class DefaultFirebaseOptions {
     apiKey: 'your-macos-api-key',
     appId: '1:123456789:macos:abcdef',
     messagingSenderId: '123456789',
-    projectId: 'your-project-id',
-    authDomain: 'your-project.firebaseapp.com',
-    storageBucket: 'your-project.appspot.com',
+    projectId: 'bacon13',
+    authDomain: 'bacon13.firebaseapp.com',
+    storageBucket: 'bacon13.appspot.com',
     iosBundleId: 'com.example.bacon13',
   );
 }

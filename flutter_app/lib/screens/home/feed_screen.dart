@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../services/post_service.dart';
-import '../../models/post_model.dart';
 import '../../widgets/post_card.dart';
 
 class FeedScreen extends StatefulWidget {

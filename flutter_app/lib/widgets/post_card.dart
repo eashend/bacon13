@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../models/post_model.dart';
 
 class PostCard extends StatelessWidget {
@@ -51,19 +50,22 @@ class PostCard extends StatelessWidget {
           ),
           
           // Post image
-          CachedNetworkImage(
-            imageUrl: post.imageUrl,
+          Image.network(
+            post.imageUrl,
             width: double.infinity,
             height: 300,
             fit: BoxFit.cover,
-            placeholder: (context, url) => Container(
-              height: 300,
-              color: Colors.grey[200],
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-            errorWidget: (context, url, error) => Container(
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Container(
+                height: 300,
+                color: Colors.grey[200],
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) => Container(
               height: 300,
               color: Colors.grey[200],
               child: Center(
