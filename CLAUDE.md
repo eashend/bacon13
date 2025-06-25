@@ -4,18 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Bacon13 is a social media application with a frontend-only React TypeScript architecture using Firebase services. The app focuses on image-based posts with real-time capabilities.
+Bacon13 is a social media application with a mobile-first Flutter architecture using Firebase services. The app focuses on image-based posts with real-time capabilities.
 
 ## Architecture
 
-**Frontend-Only Architecture**: React TypeScript with Firebase SDK
-- React TypeScript with Tailwind CSS for UI
+**Mobile-First Architecture**: Flutter with Firebase SDK
+- Flutter with Material Design for cross-platform UI (iOS, Android, Web)
 - Firebase Authentication for user management
 - Firestore for real-time database operations
 - Firebase Storage for image uploads
-- Firebase Hosting for deployment
+- Firebase Hosting for web deployment
 
-**No Backend Services**: Frontend communicates directly with Firebase
+**No Backend Services**: Flutter app communicates directly with Firebase
 - Authentication handled by Firebase Auth SDK
 - Data operations via Firestore SDK
 - Image uploads via Firebase Storage SDK
@@ -30,16 +30,45 @@ Bacon13 is a social media application with a frontend-only React TypeScript arch
 
 ## Development Workflow
 
-**IMPORTANT**: After completing any code changes, ALWAYS commit and push to GitHub:
+**CRITICAL**: Before committing ANY code changes, ALWAYS:
+1. **Run tests** to ensure all tests pass
+2. **Build the project** to verify it compiles successfully  
+3. **Fix any failing tests or build errors**
+4. **Then commit and push** to GitHub
+
 ```bash
-git add .
+# Flutter Development Workflow
+flutter test                    # ALWAYS run tests first
+flutter build web              # Verify build works
+git add .                      # Stage changes only after tests pass
+git commit -m "Descriptive commit message"
+git push origin main
+
+# React Development Workflow (deprecated - migrated to Flutter)
+cd frontend
+npm test                       # ALWAYS run tests first
+npm run build                  # Verify build works  
+cd ..
+git add .                      # Stage changes only after tests pass
 git commit -m "Descriptive commit message"
 git push origin main
 ```
 
+**NEVER commit without running tests first** - this prevents broken code from entering the repository.
+
 ## Development Commands
 
-### Frontend Development
+### Flutter Development
+```bash
+cd flutter_app
+flutter pub get    # Install dependencies  
+flutter run -d web # Start development server (web)
+flutter run        # Start development server (mobile)
+flutter build web  # Build for web production
+flutter test        # Run unit tests
+```
+
+### Legacy React Development (Deprecated - Migrated to Flutter)
 ```bash
 cd frontend
 npm install        # Install dependencies
