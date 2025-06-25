@@ -25,6 +25,15 @@ Bacon13 is a social media application with a Go microservices backend and React 
 - Cloud Storage for image uploads
 - Terraform for infrastructure as code
 
+## Development Workflow
+
+**IMPORTANT**: After completing any code changes, ALWAYS commit and push to GitHub:
+```bash
+git add .
+git commit -m "Descriptive commit message"
+git push origin main
+```
+
 ## Development Commands
 
 ### Frontend Development
