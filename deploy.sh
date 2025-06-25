@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Cloud Run Deployment Script for Bacon13 App
-# Make sure you have gcloud CLI installed and authenticated
+# Firebase Deployment Script for Bacon13 App
+# Make sure you have Firebase CLI and gcloud CLI installed and authenticated
 
 set -e
 
@@ -10,25 +10,25 @@ PROJECT_ID=${1:-"bacon13"}
 REGION=${2:-"us-central1"}
 ENVIRONMENT=${3:-"dev"}
 
-echo "Deploying Bacon13 App to Cloud Run..."
+echo "Deploying Bacon13 App (Frontend-Only Firebase Architecture)..."
 echo "Project ID: $PROJECT_ID"
 echo "Region: $REGION"
 echo "Environment: $ENVIRONMENT"
 
 # Set the project
 gcloud config set project $PROJECT_ID
+firebase use $PROJECT_ID
 
 # Enable required APIs
 echo "Enabling required APIs..."
 gcloud services enable \
-    run.googleapis.com \
-    cloudbuild.googleapis.com \
-    containerregistry.googleapis.com \
     firestore.googleapis.com \
+    firebase.googleapis.com \
+    identitytoolkit.googleapis.com \
     storage.googleapis.com
 
-# Deploy infrastructure with Terraform
-echo "Deploying infrastructure with Terraform..."
+# Deploy infrastructure with Terraform (Firebase resources)
+echo "Deploying Firebase infrastructure with Terraform..."
 cd infrastructure
 
 # Initialize Terraform if not already done
@@ -56,38 +56,34 @@ fi
 
 cd ..
 
-# Build and deploy services
-SERVICES=("auth-service" "user-service" "post-service")
+# Deploy Firebase Security Rules
+echo "Deploying Firestore security rules..."
+firebase deploy --only firestore:rules
 
-for SERVICE in "${SERVICES[@]}"; do
-    echo "Building and deploying $SERVICE..."
-    
-    # Build the image
-    gcloud builds submit \
-        --tag gcr.io/$PROJECT_ID/$SERVICE:latest \
-        backend/$SERVICE/
-    
-    # Deploy to Cloud Run
-    gcloud run deploy $SERVICE \
-        --image gcr.io/$PROJECT_ID/$SERVICE:latest \
-        --platform managed \
-        --region $REGION \
-        --allow-unauthenticated \
-        --port 8080 \
-        --memory 512Mi \
-        --cpu 1 \
-        --max-instances 10 \
-        --set-env-vars "PROJECT_ID=$PROJECT_ID,ENVIRONMENT=$ENVIRONMENT"
-done
+echo "Deploying Firebase Storage security rules..."
+firebase deploy --only storage
 
+# Build and deploy frontend
+echo "Building and deploying frontend..."
+cd frontend
+
+# Install dependencies
+npm install
+
+# Build the React app
+npm run build
+
+# Deploy to Firebase Hosting
+firebase deploy --only hosting
+
+cd ..
+
+echo ""
 echo "Deployment completed!"
 echo ""
-echo "Service URLs:"
-for SERVICE in "${SERVICES[@]}"; do
-    URL=$(gcloud run services describe $SERVICE --region=$REGION --format="value(status.url)")
-    echo "$SERVICE: $URL"
-done
-
+echo "Firebase Console: https://console.firebase.google.com/project/$PROJECT_ID"
+echo "Firestore Database: https://console.firebase.google.com/project/$PROJECT_ID/firestore"
+echo "Firebase Storage: https://console.firebase.google.com/project/$PROJECT_ID/storage"
+echo "Firebase Authentication: https://console.firebase.google.com/project/$PROJECT_ID/authentication"
 echo ""
-echo "To view logs:"
-echo "gcloud logs read --project=$PROJECT_ID --filter='resource.type=cloud_run_revision'"
+echo "Your app should be available at: https://$PROJECT_ID.web.app"

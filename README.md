@@ -1,50 +1,56 @@
-# Bacon13 App - Cloud Run Deployment
+# Bacon13 App - Firebase Frontend-Only Architecture
 
-A social media application built with Go microservices backend, Flutter frontend, deployed on Google Cloud Run.
+A social media application built with React TypeScript frontend using Firebase services directly - no backend required!
 
 ## Architecture
 
-- **Backend**: Go microservices (auth-service, user-service, post-service)
+- **Frontend**: React TypeScript with Tailwind CSS
+- **Authentication**: Firebase Authentication
 - **Database**: Firestore (NoSQL document database)
-- **Storage**: Google Cloud Storage for images
-- **Deployment**: Google Cloud Run (instead of Kubernetes)
-- **Frontend**: Flutter (to be implemented)
+- **Storage**: Firebase Storage for images
+- **Hosting**: Firebase Hosting
+- **Infrastructure**: Terraform for Firebase resource provisioning
 
 ## Features
 
 ### Must Have (MVP)
-- ✅ User registration and login with email/password
-- ✅ Profile image upload during registration for ML recognition
-- ✅ Image post uploads (no captions)
+- ✅ User registration and login with Firebase Auth
+- ✅ Image post uploads to Firebase Storage
 - ✅ View own posts in reverse chronological order
-- ✅ Cloud Storage integration
-- ✅ JWT authentication
-- ✅ Cloud Run deployment
+- ✅ Public feed with latest posts
+- ✅ Real-time data synchronization with Firestore
+- ✅ Responsive UI with Tailwind CSS
+- ✅ Firebase Hosting deployment
 
 ### Should Have
-- 🔄 View posts by other users
-- 🔄 Basic user profile page
+- 🔄 Real-time notifications
+- 🔄 User profile customization
+- 🔄 Image compression and optimization
 
 ### Could Have
-- 🔄 Public feed with latest posts
+- 🔄 Social features (likes, comments)
 - 🔄 Pagination/lazy loading
+- 🔄 Advanced search and filters
 
-## Services
+## Frontend Features
 
-### Auth Service (Port 8081)
-- Firebase Auth token verification
-- User profile management in Firestore
-- Automatic user profile creation on first login
+### Authentication
+- Email/password registration and login
+- Real-time authentication state management
+- Automatic user profile creation in Firestore
+- Protected routes and components
 
-### User Service (Port 8080)
-- User profile management
-- Profile image uploads
-- User data retrieval
+### Posts Management
+- Direct image upload to Firebase Storage
+- Create posts with image validation
+- View personal posts and public feed
+- Real-time post updates
 
-### Post Service (Port 8082)
-- Image post uploads
-- Post retrieval and feeds
-- Image processing and storage
+### UI/UX
+- Responsive design with Tailwind CSS
+- Loading states and error handling
+- Clean, modern interface
+- Mobile-friendly layout
 
 ## Prerequisites
 
@@ -66,14 +72,14 @@ A social media application built with Go microservices backend, Flutter frontend
 
 3. **Required Tools**
    ```bash
+   # Install Node.js and npm
+   # https://nodejs.org/
+   
    # Install Google Cloud CLI
    # https://cloud.google.com/sdk/docs/install
    
    # Install Terraform
    # https://learn.hashicorp.com/tutorials/terraform/install-cli
-   
-   # Install Go (for local development)
-   # https://golang.org/doc/install
    ```
 
 4. **Authentication**
@@ -94,16 +100,23 @@ A social media application built with Go microservices backend, Flutter frontend
    chmod +x deploy.sh
    ```
 
-2. **Deploy to Cloud Run**
+2. **Configure Firebase**
+   ```bash
+   # Create frontend/.env file with your Firebase config
+   cp frontend/.env.example frontend/.env
+   # Edit with your Firebase project credentials
+   ```
+
+3. **Deploy to Firebase**
    ```bash
    ./deploy.sh YOUR_GCP_PROJECT_ID us-central1 dev
    ```
 
    This script will:
-   - Enable required GCP APIs
+   - Enable required Firebase APIs
    - Deploy infrastructure with Terraform
-   - Build and deploy all microservices to Cloud Run
-   - Output service URLs
+   - Deploy Firestore and Storage security rules
+   - Build and deploy frontend to Firebase Hosting
 
 ## Manual Deployment
 
@@ -118,158 +131,174 @@ terraform plan
 terraform apply
 ```
 
-### 2. Build and Deploy Services
+### 2. Deploy Firebase Rules and Frontend
 
 ```bash
-# Set your project ID
-export PROJECT_ID="your-gcp-project-id"
+# Deploy Firestore security rules
+firebase deploy --only firestore:rules
 
-# Build and deploy auth service
-gcloud builds submit --tag gcr.io/$PROJECT_ID/auth-service:latest backend/auth-service/
-gcloud run deploy auth-service \
-    --image gcr.io/$PROJECT_ID/auth-service:latest \
-    --platform managed \
-    --region us-central1 \
-    --allow-unauthenticated
+# Deploy Storage security rules  
+firebase deploy --only storage
 
-# Repeat for other services...
-```
-
-## API Endpoints
-
-### Auth Service
-```
-POST /verify - Firebase ID token verification
-GET /profile - Get user profile (requires auth)
-PUT /profile - Update user profile (requires auth)
-GET /health - Health check
+# Build and deploy frontend
+cd frontend
+npm install
+npm run build
+firebase deploy --only hosting
 ```
 
-### User Service
+## Frontend Structure
+
+### Main Components
 ```
-GET /users/{id} - Get user profile
-PUT /users/{id} - Update user profile
-POST /users/{id}/profile-images - Upload profile images
-GET /health - Health check
+src/
+├── components/
+│   ├── Auth/
+│   │   ├── LoginForm.tsx
+│   │   └── RegisterForm.tsx
+│   └── Posts/
+│       ├── CreatePost.tsx
+│       └── PostList.tsx
+├── contexts/
+│   └── AuthContext.tsx
+├── services/
+│   ├── authService.ts
+│   └── postService.ts
+└── firebase/
+    └── config.ts
 ```
 
-### Post Service
-```
-POST /posts - Create new post
-GET /posts/user/{userId} - Get user's posts
-GET /posts/feed - Get public feed
-GET /health - Health check
-```
+### Key Features
+- **Authentication**: Firebase Auth with email/password
+- **Data Storage**: Firestore for user profiles and posts
+- **File Upload**: Firebase Storage for images
+- **Real-time Updates**: Firestore listeners for live data
+- **Security**: Client-side security rules enforcement
 
 ## Environment Variables
 
-The services use these environment variables (automatically set by Terraform):
+Create a `.env` file in the `frontend/` directory with your Firebase configuration:
 
-- `PORT` - Service port
-- `PROJECT_ID` - GCP project ID (required for Firestore)
-- `STORAGE_BUCKET` - Cloud Storage bucket name
-- `ENVIRONMENT` - Environment (dev/staging/prod)
-- `FIRESTORE_EMULATOR_HOST` - For local development with Firestore emulator
+```bash
+REACT_APP_FIREBASE_API_KEY=your-api-key
+REACT_APP_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+REACT_APP_FIREBASE_PROJECT_ID=your-project-id
+REACT_APP_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+REACT_APP_FIREBASE_APP_ID=your-app-id
+```
 
 ### Local Development
 
-### 1. Database Setup
+### 1. Frontend Setup
 ```bash
-# For local development, use the Firestore emulator
-gcloud components install cloud-firestore-emulator
-
-# Start the Firestore emulator
-gcloud emulators firestore start --host-port=localhost:8080
-
-# In another terminal, set environment variables for local development
-export FIRESTORE_EMULATOR_HOST=localhost:8080
-export PROJECT_ID=your-project-id
-export STORAGE_BUCKET=your-bucket-name
+cd frontend
+npm install
+npm start
 ```
 
-### 2. Run Services
+### 2. Firebase Emulation (Optional)
 ```bash
-# Terminal 1 - Auth Service
-cd backend/auth-service
-go mod tidy
-go run main.go
+# Install and start Firebase emulators
+npm install -g firebase-tools
+firebase emulators:start
 
-# Terminal 2 - User Service
-cd backend/user-service
-go mod tidy
-go run main.go
-
-# Terminal 3 - Post Service
-cd backend/post-service
-go mod tidy
-go run main.go
+# In another terminal, run frontend with emulator
+export REACT_APP_USE_EMULATOR=true
+cd frontend && npm start
 ```
 
 ## Monitoring and Logs
 
 ```bash
-# View logs for a specific service
-gcloud logs read --project=YOUR_PROJECT_ID --filter='resource.type=cloud_run_revision AND resource.labels.service_name=auth-service'
+# View Firebase Hosting logs
+firebase projects:list
 
-# Monitor service metrics
-gcloud run services describe auth-service --region=us-central1
+# Monitor Firebase services in console
+echo "Firebase Console: https://console.firebase.google.com/project/YOUR_PROJECT_ID"
+echo "Firestore: https://console.firebase.google.com/project/YOUR_PROJECT_ID/firestore"
+echo "Storage: https://console.firebase.google.com/project/YOUR_PROJECT_ID/storage"
+echo "Authentication: https://console.firebase.google.com/project/YOUR_PROJECT_ID/authentication"
 
-# Check service status
-gcloud run services list --region=us-central1
+# Check deployment status
+firebase hosting:sites:list
 ```
 
 ## Security Considerations
 
-- JWT secret should be changed in production
-- Database password should be properly secured
-- Consider implementing rate limiting
-- Use HTTPS for all endpoints
-- Implement proper CORS policies
+- Firestore security rules enforce data access permissions
+- Firebase Storage rules control file upload permissions
+- Firebase Auth handles secure authentication automatically
+- Client-side validation and server-side security rules
+- HTTPS enabled by default on Firebase Hosting
+- No custom backend reduces attack surface
 
 ## Scaling
 
-Cloud Run automatically scales based on traffic:
-- Scales to zero when no requests
-- Auto-scales up to configured max instances (default: 10)
-- CPU and memory can be adjusted per service
+Firebase services automatically scale:
+- **Firestore**: Scales automatically with usage
+- **Firebase Storage**: Handles any number of uploads
+- **Firebase Auth**: Supports millions of users
+- **Firebase Hosting**: Global CDN with automatic scaling
+- No server management required
 
 ## Cost Optimization
 
-- Cloud Run pricing is per-request and CPU/memory usage
-- Services scale to zero when not in use
-- Use Cloud SQL's smallest tier for development
-- Monitor storage costs for uploaded images
+- **Firebase pricing is pay-per-use**:
+  - Firestore: Per document read/write/delete
+  - Storage: Per GB stored and bandwidth
+  - Auth: Free up to 50,000 MAU
+  - Hosting: Free tier includes 10GB hosting
+- **No idle costs** - only pay for actual usage
+- Monitor usage in Firebase Console
 
 ## Next Steps
 
-1. Implement user-service and post-service
-2. Add Flutter frontend
-3. Implement ML-based user recognition
-4. Add image processing and optimization
-5. Implement caching with Redis
-6. Add monitoring and alerting
-7. Set up CI/CD pipeline
+1. **Enhanced Features**:
+   - Add real-time notifications
+   - Implement social features (likes, comments)
+   - Add image compression and optimization
+   - Create user profile customization
+
+2. **Performance**:
+   - Implement pagination for large feeds
+   - Add image lazy loading
+   - Optimize Firestore queries with indexes
+   - Add caching strategies
+
+3. **Development**:
+   - Set up CI/CD pipeline with GitHub Actions
+   - Add comprehensive testing suite
+   - Implement error monitoring (Sentry)
+   - Add analytics (Google Analytics)
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Firestore Connection Errors**
-   - Verify Firestore is enabled in your GCP project
-   - Check PROJECT_ID environment variable is set
-   - Ensure service account has Firestore User role
+1. **Firebase Configuration Errors**
+   - Verify `.env` file exists in `frontend/` directory
+   - Check all Firebase config values are correct
+   - Ensure Firebase project is properly initialized
 
-2. **Storage Upload Errors**
-   - Verify bucket exists and permissions
-   - Check service account has Storage Admin role
+2. **Authentication Issues**
+   - Verify Firebase Auth is enabled in Firebase Console
+   - Check email/password provider is enabled
+   - Ensure correct Firebase project ID in config
 
-3. **Service Build Failures**
-   - Check Dockerfile paths
-   - Verify Go modules are properly configured
+3. **Firestore Permission Errors**
+   - Verify Firestore security rules are deployed
+   - Check user is authenticated before accessing data
+   - Ensure rules allow the operation being attempted
 
-4. **Authentication Issues**
-   - Verify Firebase project configuration
-   - Check Firebase ID token validity and expiration
-   - Ensure Firebase Auth is enabled in GCP project
+4. **Storage Upload Errors**
+   - Verify Firebase Storage rules are deployed
+   - Check file size limits (5MB for posts, 2MB for profiles)
+   - Ensure user is authenticated for uploads
 
-For more help, check the Cloud Run documentation: https://cloud.google.com/run/docs
+5. **Deployment Issues**
+   - Run `firebase login` to authenticate
+   - Check `firebase use PROJECT_ID` is set correctly
+   - Verify all required APIs are enabled in GCP
+
+For more help, check the Firebase documentation: https://firebase.google.com/docs

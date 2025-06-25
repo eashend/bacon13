@@ -4,26 +4,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Bacon13 is a social media application with a Go microservices backend and React TypeScript frontend, deployed on Google Cloud Run. The app focuses on image-based posts with ML-powered user recognition features.
+Bacon13 is a social media application with a frontend-only React TypeScript architecture using Firebase services. The app focuses on image-based posts with real-time capabilities.
 
 ## Architecture
 
-**Backend**: Go microservices architecture with shared models
-- `auth-service` (port 8081): Firebase Auth token verification and user profile management
-- `user-service` (port 8080): User profiles and profile image management  
-- `post-service` (port 8082): Image post creation and feeds
-- `shared/`: Common database models, Firestore/Firebase Auth utilities, and API response types
+**Frontend-Only Architecture**: React TypeScript with Firebase SDK
+- React TypeScript with Tailwind CSS for UI
+- Firebase Authentication for user management
+- Firestore for real-time database operations
+- Firebase Storage for image uploads
+- Firebase Hosting for deployment
 
-**Frontend**: React TypeScript with Tailwind CSS
-- Uses React Router for navigation
-- Axios for API communication
-- Testing setup with Jest and React Testing Library
+**No Backend Services**: Frontend communicates directly with Firebase
+- Authentication handled by Firebase Auth SDK
+- Data operations via Firestore SDK
+- Image uploads via Firebase Storage SDK
+- Real-time updates with Firestore listeners
 
-**Infrastructure**: Google Cloud Platform
-- Cloud Run for service deployment
+**Infrastructure**: Google Cloud Platform + Firebase
+- Firebase Authentication for user management
 - Firestore for document database
-- Cloud Storage for image uploads
-- Terraform for infrastructure as code
+- Firebase Storage for image uploads
+- Firebase Hosting for frontend deployment
+- Terraform for infrastructure provisioning
 
 ## Development Workflow
 
@@ -39,45 +42,52 @@ git push origin main
 ### Frontend Development
 ```bash
 cd frontend
+npm install        # Install dependencies
 npm start          # Start development server
 npm run build      # Build for production
 npm test           # Run tests
 ```
 
-### Backend Development
+### Firebase Emulation (Local Development)
 ```bash
-# Run individual services locally
-cd backend/auth-service && go run main.go
-cd backend/user-service && go run main.go  
-cd backend/post-service && go run main.go
+# Install Firebase CLI
+npm install -g firebase-tools
 
-# Install dependencies
-cd backend/[service-name] && go mod tidy
+# Start Firebase emulators
+firebase emulators:start
+
+# In another terminal, set environment for local emulation
+export REACT_APP_USE_EMULATOR=true
+cd frontend && npm start
 ```
 
-### Local Development Setup
+### Firebase Configuration
 ```bash
-# Set environment variables for local development
-# Note: Firestore requires a GCP project - use Firestore emulator for local testing
-export PROJECT_ID=your-project-id
-export STORAGE_BUCKET=your-bucket-name
-
-# To use Firestore emulator locally:
-gcloud components install cloud-firestore-emulator
-gcloud emulators firestore start --host-port=localhost:8080
-export FIRESTORE_EMULATOR_HOST=localhost:8080
+# Create .env file in frontend/ directory
+REACT_APP_FIREBASE_API_KEY=your-api-key
+REACT_APP_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+REACT_APP_FIREBASE_PROJECT_ID=your-project-id
+REACT_APP_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+REACT_APP_FIREBASE_APP_ID=your-app-id
 ```
 
 ### Deployment
 ```bash
-# Deploy to Google Cloud Run
+# Deploy Firebase infrastructure and frontend
 ./deploy.sh YOUR_GCP_PROJECT_ID us-central1 dev
 
-# Manual infrastructure deployment
-cd infrastructure
-terraform init
-terraform plan
-terraform apply
+# Manual deployment steps:
+# 1. Deploy infrastructure
+cd infrastructure && terraform apply
+
+# 2. Deploy Firebase rules
+firebase deploy --only firestore:rules
+firebase deploy --only storage
+
+# 3. Deploy frontend
+cd frontend && npm run build
+firebase deploy --only hosting
 ```
 
 ## Key Components
@@ -88,35 +98,42 @@ terraform apply
 - Users use Firebase UID strings as document IDs, posts use UUID strings
 
 ### Authentication Flow
-- Firebase Authentication for user registration/login
-- Firebase ID tokens for API authentication
-- Server-side token verification using Firebase Admin SDK
+- Firebase Authentication SDK for user registration/login
+- Client-side Firebase Auth state management
 - Automatic user profile creation in Firestore on first login
-- Bearer token format for API requests
+- Firebase Auth guards for protected routes
+- Real-time auth state synchronization
 
-### Shared Package
-Contains common types and database utilities:
-- `models.go`: User, Post, request/response structs with Firestore tags
-- `database.go`: Firestore client initialization and connection management
-- `firebase_auth.go`: Firebase Auth utilities for token verification and user management
-- Uses Firestore native mode for real-time capabilities
+### Frontend Services
+- `authService.ts`: Firebase Auth wrapper functions for login/register/signout
+- `postService.ts`: Firestore operations for posts and image uploads
+- `AuthContext.tsx`: React context for authentication state management
+- Components organized by feature (Auth/, Posts/)
+- Firebase SDK handles all backend communication
 
-### Service Communication
-Services communicate via HTTP APIs with standardized JSON responses using the `APIResponse` struct.
+### Security
+- Firestore security rules enforce data access permissions
+- Firebase Storage rules control image upload permissions
+- Client-side Firebase Auth provides secure authentication
+- No custom backend reduces attack surface
 
 ## Environment Variables
 
-All services use these environment variables (set automatically by Terraform in production):
-- `PORT`: Service port number
-- `PROJECT_ID`: GCP project identifier (required for Firestore)
-- `STORAGE_BUCKET`: Cloud Storage bucket for images
-- `ENVIRONMENT`: Deployment environment (dev/staging/prod)
-- `FIRESTORE_EMULATOR_HOST`: For local development with Firestore emulator
+Frontend uses these environment variables (set in .env file):
+- `REACT_APP_FIREBASE_API_KEY`: Firebase API key
+- `REACT_APP_FIREBASE_AUTH_DOMAIN`: Firebase Auth domain
+- `REACT_APP_FIREBASE_PROJECT_ID`: Firebase project ID
+- `REACT_APP_FIREBASE_STORAGE_BUCKET`: Firebase Storage bucket
+- `REACT_APP_FIREBASE_MESSAGING_SENDER_ID`: Firebase messaging sender ID
+- `REACT_APP_FIREBASE_APP_ID`: Firebase app ID
+- `REACT_APP_USE_EMULATOR`: For local development with Firebase emulators
 
 ## File Structure Notes
 
-- Backend services follow Go project conventions with main.go entry points
 - Frontend uses Create React App structure with TypeScript
-- Infrastructure code is in Terraform format
-- Each service has its own Dockerfile for containerization
-- Go modules use local replacement for shared package via `replace` directive
+- Firebase configuration files in project root (firebase.json, firestore.rules, storage.rules)
+- Infrastructure code uses Terraform for Firebase resource provisioning
+- React components organized by feature in src/components/
+- Firebase services abstracted in src/services/
+- Authentication state managed via React Context
+- No backend directories - pure frontend architecture
