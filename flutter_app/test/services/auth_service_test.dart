@@ -15,7 +15,7 @@ void main() {
         ];
 
         for (final email in validEmails) {
-          final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+          final emailRegex = RegExp(r'^[\w\-\.+]+@([\w-]+\.)+[\w-]{2,4}$');
           expect(emailRegex.hasMatch(email), isTrue, reason: 'Email $email should be valid');
         }
       });
@@ -30,7 +30,7 @@ void main() {
         ];
 
         for (final email in invalidEmails) {
-          final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+          final emailRegex = RegExp(r'^[\w\-\.+]+@([\w-]+\.)+[\w-]{2,4}$');
           expect(emailRegex.hasMatch(email), isFalse, reason: 'Email $email should be invalid');
         }
       });
