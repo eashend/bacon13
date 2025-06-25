@@ -5,7 +5,7 @@ A social media application built with Go microservices backend, Flutter frontend
 ## Architecture
 
 - **Backend**: Go microservices (auth-service, user-service, post-service)
-- **Database**: PostgreSQL on Cloud SQL
+- **Database**: Firestore (NoSQL document database)
 - **Storage**: Google Cloud Storage for images
 - **Deployment**: Google Cloud Run (instead of Kubernetes)
 - **Frontend**: Flutter (to be implemented)
@@ -154,28 +154,25 @@ GET /health - Health check
 The services use these environment variables (automatically set by Terraform):
 
 - `PORT` - Service port
-- `DB_HOST` - Database host (Cloud SQL socket)
-- `DB_NAME` - Database name
-- `DB_USER` - Database user
-- `DB_PASSWORD` - Database password
+- `PROJECT_ID` - GCP project ID (required for Firestore)
 - `STORAGE_BUCKET` - Cloud Storage bucket name
-- `PROJECT_ID` - GCP project ID
 - `ENVIRONMENT` - Environment (dev/staging/prod)
+- `FIRESTORE_EMULATOR_HOST` - For local development with Firestore emulator
 
 ### Local Development
 
 ### 1. Database Setup
 ```bash
-# Start local PostgreSQL (using Docker)
-docker run --name postgres-dev -e POSTGRES_PASSWORD=password -e POSTGRES_DB=bacon13_app -p 5432:5432 -d postgres:15
+# For local development, use the Firestore emulator
+gcloud components install cloud-firestore-emulator
 
-# Set local environment variables
-export DB_HOST=localhost:5432
-export DB_NAME=bacon13_app
-export DB_USER=postgres
-export DB_PASSWORD=password
-export STORAGE_BUCKET=your-bucket-name
+# Start the Firestore emulator
+gcloud emulators firestore start --host-port=localhost:8080
+
+# In another terminal, set environment variables for local development
+export FIRESTORE_EMULATOR_HOST=localhost:8080
 export PROJECT_ID=your-project-id
+export STORAGE_BUCKET=your-bucket-name
 ```
 
 ### 2. Run Services
@@ -245,10 +242,10 @@ Cloud Run automatically scales based on traffic:
 
 ### Common Issues
 
-1. **Database Connection Errors**
-   - Verify Cloud SQL instance is running
-   - Check connection string format
-   - Ensure service account has Cloud SQL Client role
+1. **Firestore Connection Errors**
+   - Verify Firestore is enabled in your GCP project
+   - Check PROJECT_ID environment variable is set
+   - Ensure service account has Firestore User role
 
 2. **Storage Upload Errors**
    - Verify bucket exists and permissions

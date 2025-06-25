@@ -38,8 +38,7 @@ resource "google_project_service" "required_apis" {
     "run.googleapis.com",
     "cloudbuild.googleapis.com",
     "containerregistry.googleapis.com",
-    "sql-component.googleapis.com",
-    "sqladmin.googleapis.com",
+    "firestore.googleapis.com",
     "storage.googleapis.com"
   ])
   
@@ -49,42 +48,16 @@ resource "google_project_service" "required_apis" {
   disable_dependent_services = true
 }
 
-# Cloud SQL instance for PostgreSQL
-resource "google_sql_database_instance" "main" {
-  name             = "bacon13-app-${var.environment}"
-  database_version = "POSTGRES_15"
-  region           = var.region
-  deletion_protection = false
+# Firestore database
+resource "google_firestore_database" "main" {
+  project                     = var.project_id
+  name                        = "(default)"
+  location_id                 = var.region
+  type                        = "FIRESTORE_NATIVE"
+  delete_protection_state     = "DELETE_PROTECTION_DISABLED"
+  deletion_policy             = "DELETE"
 
   depends_on = [google_project_service.required_apis]
-
-  settings {
-    tier = "db-f1-micro"
-    
-    ip_configuration {
-      ipv4_enabled = true
-      authorized_networks {
-        name  = "all"
-        value = "0.0.0.0/0"
-      }
-    }
-
-    backup_configuration {
-      enabled = true
-      start_time = "03:00"
-    }
-  }
-}
-
-resource "google_sql_database" "database" {
-  name     = "bacon13_app"
-  instance = google_sql_database_instance.main.name
-}
-
-resource "google_sql_user" "user" {
-  name     = "app_user"
-  instance = google_sql_database_instance.main.name
-  password = "secure_password_change_in_prod"
 }
 
 # Cloud Storage bucket for image uploads
@@ -121,9 +94,9 @@ resource "google_service_account" "cloud_run_sa" {
 }
 
 # IAM bindings for the service account
-resource "google_project_iam_binding" "cloud_run_sa_sql" {
+resource "google_project_iam_binding" "cloud_run_sa_firestore" {
   project = var.project_id
-  role    = "roles/cloudsql.client"
+  role    = "roles/datastore.user"
   
   members = [
     "serviceAccount:${google_service_account.cloud_run_sa.email}",
@@ -173,7 +146,6 @@ resource "google_cloud_run_service" "services" {
       annotations = {
         "autoscaling.knative.dev/maxScale" = "10"
         "autoscaling.knative.dev/minScale" = "0"
-        "run.googleapis.com/cloudsql-instances" = google_sql_database_instance.main.connection_name
         "run.googleapis.com/cpu-throttling" = "false"
       }
     }
@@ -191,26 +163,6 @@ resource "google_cloud_run_service" "services" {
         env {
           name  = "PORT"
           value = tostring(each.value.port)
-        }
-
-        env {
-          name  = "DB_HOST"
-          value = "/cloudsql/${google_sql_database_instance.main.connection_name}"
-        }
-
-        env {
-          name  = "DB_NAME"
-          value = google_sql_database.database.name
-        }
-
-        env {
-          name  = "DB_USER"
-          value = google_sql_user.user.name
-        }
-
-        env {
-          name  = "DB_PASSWORD"
-          value = google_sql_user.user.password
         }
 
         env {
@@ -283,17 +235,12 @@ output "service_urls" {
   }
 }
 
-output "database_connection_name" {
-  description = "Cloud SQL connection name"
-  value = google_sql_database_instance.main.connection_name
+output "firestore_database_name" {
+  description = "Firestore database name"
+  value = google_firestore_database.main.name
 }
 
 output "storage_bucket_name" {
   description = "Cloud Storage bucket name"
   value = google_storage_bucket.images_bucket.name
-}
-
-output "database_ip" {
-  description = "Database IP address"
-  value = google_sql_database_instance.main.ip_address[0].ip_address
 }

@@ -7,21 +7,21 @@ import (
 
 // User represents a user in the system
 type User struct {
-	ID             uuid.UUID  `json:"id" db:"id"`
-	Email          string     `json:"email" db:"email"`
-	PasswordHash   string     `json:"-" db:"password_hash"`
-	CreatedAt      time.Time  `json:"created_at" db:"created_at"`
-	UpdatedAt      time.Time  `json:"updated_at" db:"updated_at"`
-	ProfileImages  []string   `json:"profile_images" db:"profile_images"`
+	ID             uuid.UUID  `json:"id" firestore:"id"`
+	Email          string     `json:"email" firestore:"email"`
+	PasswordHash   string     `json:"-" firestore:"password_hash"`
+	CreatedAt      time.Time  `json:"created_at" firestore:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at" firestore:"updated_at"`
+	ProfileImages  []string   `json:"profile_images" firestore:"profile_images"`
 }
 
 // Post represents an image post
 type Post struct {
-	ID        uuid.UUID `json:"id" db:"id"`
-	UserID    uuid.UUID `json:"user_id" db:"user_id"`
-	ImageURL  string    `json:"image_url" db:"image_url"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+	ID        uuid.UUID `json:"id" firestore:"id"`
+	UserID    uuid.UUID `json:"user_id" firestore:"user_id"`
+	ImageURL  string    `json:"image_url" firestore:"image_url"`
+	CreatedAt time.Time `json:"created_at" firestore:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" firestore:"updated_at"`
 }
 
 // UserRegistrationRequest represents the payload for user registration

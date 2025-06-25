@@ -92,14 +92,17 @@ func register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if user already exists
-	var exists bool
-	err := shared.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)", req.Email).Scan(&exists)
+	ctx := r.Context()
+	usersRef := shared.FirestoreClient.Collection("users")
+	query := usersRef.Where("email", "==", req.Email).Limit(1)
+	docs, err := query.Documents(ctx).GetAll()
 	if err != nil {
+		log.Printf("Failed to check existing user: %v", err)
 		http.Error(w, "Database error", http.StatusInternalServerError)
 		return
 	}
 
-	if exists {
+	if len(docs) > 0 {
 		response := shared.APIResponse{
 			Success: false,
 			Error:   "User with this email already exists",
@@ -121,11 +124,17 @@ func register(w http.ResponseWriter, r *http.Request) {
 	userID := uuid.New()
 	now := time.Now()
 
-	_, err = shared.DB.Exec(`
-		INSERT INTO users (id, email, password_hash, created_at, updated_at) 
-		VALUES ($1, $2, $3, $4, $5)
-	`, userID, req.Email, string(hashedPassword), now, now)
+	user := shared.User{
+		ID:            userID,
+		Email:         req.Email,
+		PasswordHash:  string(hashedPassword),
+		CreatedAt:     now,
+		UpdatedAt:     now,
+		ProfileImages: []string{},
+	}
 
+	userRef := shared.FirestoreClient.Collection("users").Doc(userID.String())
+	_, err = userRef.Set(ctx, user)
 	if err != nil {
 		log.Printf("Failed to create user: %v", err)
 		http.Error(w, "Failed to create user", http.StatusInternalServerError)
@@ -139,11 +148,13 @@ func register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := shared.User{
-		ID:        userID,
-		Email:     req.Email,
-		CreatedAt: now,
-		UpdatedAt: now,
+	// Remove password hash from response
+	responseUser := shared.User{
+		ID:            userID,
+		Email:         req.Email,
+		CreatedAt:     now,
+		UpdatedAt:     now,
+		ProfileImages: []string{},
 	}
 
 	response := shared.APIResponse{
@@ -151,7 +162,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 		Message: "User registered successfully",
 		Data: shared.AuthResponse{
 			Token: token,
-			User:  user,
+			User:  responseUser,
 		},
 	}
 
@@ -180,14 +191,11 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get user from database
-	var user shared.User
-	var passwordHash string
-	err := shared.DB.QueryRow(`
-		SELECT id, email, password_hash, created_at, updated_at, profile_images
-		FROM users WHERE email = $1
-	`, req.Email).Scan(&user.ID, &user.Email, &passwordHash, &user.CreatedAt, &user.UpdatedAt, &user.ProfileImages)
-
-	if err != nil {
+	ctx := r.Context()
+	usersRef := shared.FirestoreClient.Collection("users")
+	query := usersRef.Where("email", "==", req.Email).Limit(1)
+	docs, err := query.Documents(ctx).GetAll()
+	if err != nil || len(docs) == 0 {
 		response := shared.APIResponse{
 			Success: false,
 			Error:   "Invalid email or password",
@@ -198,8 +206,16 @@ func login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var user shared.User
+	err = docs[0].DataTo(&user)
+	if err != nil {
+		log.Printf("Failed to decode user data: %v", err)
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
 	// Verify password
-	if err := bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(req.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
 		response := shared.APIResponse{
 			Success: false,
 			Error:   "Invalid email or password",
@@ -217,12 +233,16 @@ func login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Remove password hash from response
+	responseUser := user
+	responseUser.PasswordHash = ""
+
 	response := shared.APIResponse{
 		Success: true,
 		Message: "Login successful",
 		Data: shared.AuthResponse{
 			Token: token,
-			User:  user,
+			User:  responseUser,
 		},
 	}
 

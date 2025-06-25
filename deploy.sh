@@ -24,8 +24,7 @@ gcloud services enable \
     run.googleapis.com \
     cloudbuild.googleapis.com \
     containerregistry.googleapis.com \
-    sql-component.googleapis.com \
-    sqladmin.googleapis.com \
+    firestore.googleapis.com \
     storage.googleapis.com
 
 # Deploy infrastructure with Terraform
@@ -78,7 +77,6 @@ for SERVICE in "${SERVICES[@]}"; do
         --memory 512Mi \
         --cpu 1 \
         --max-instances 10 \
-        --set-cloudsql-instances $PROJECT_ID:$REGION:bacon13-app-$ENVIRONMENT \
         --set-env-vars "PROJECT_ID=$PROJECT_ID,ENVIRONMENT=$ENVIRONMENT"
 done
 
