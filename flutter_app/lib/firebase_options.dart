@@ -44,12 +44,13 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'your-web-api-key',
-    appId: '1:123456789:web:abcdef',
-    messagingSenderId: '123456789',
+    apiKey: 'AIzaSyB99as7K_bCTnGBoKk0U8w7T2P0Sk1S_dQ',
+    appId: '1:1035009518967:web:612a98dac7120aa76e0572',
+    messagingSenderId: '1035009518967',
     projectId: 'bacon13',
     authDomain: 'bacon13.firebaseapp.com',
-    storageBucket: 'bacon13.appspot.com',
+    storageBucket: 'bacon13.firebasestorage.app',
+    measurementId: 'G-VE5BCWN6HQ',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
