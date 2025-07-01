@@ -31,13 +31,15 @@ Bacon13 is a social media application with a mobile-first Flutter architecture u
 ## Development Workflow
 
 **CRITICAL**: Before committing ANY code changes, ALWAYS:
-1. **Run tests** to ensure all tests pass
-2. **Build the project** to verify it compiles successfully  
-3. **Fix any failing tests or build errors**
-4. **Then commit and push** to GitHub
+1. **Use latest Flutter version** - Run `flutter upgrade` regularly
+2. **Run tests** to ensure all tests pass
+3. **Build the project** to verify it compiles successfully  
+4. **Fix any failing tests or build errors**
+5. **Then commit and push** to GitHub
 
 ```bash
 # Flutter Development Workflow
+flutter upgrade                 # Keep Flutter up to date
 flutter test                    # ALWAYS run tests first
 flutter build web              # Verify build works
 git add .                      # Stage changes only after tests pass
@@ -60,13 +62,20 @@ git push origin main
 
 ### Flutter Development
 ```bash
+# Setup and maintenance
+flutter upgrade     # Always use latest Flutter version
+flutter doctor      # Verify Flutter installation
+
 cd flutter_app
-flutter pub get    # Install dependencies  
-flutter run -d web # Start development server (web)
-flutter run        # Start development server (mobile)
-flutter build web  # Build for web production
-flutter test        # Run unit tests
+flutter pub get     # Install dependencies  
+flutter run -d web  # Start development server (web)
+flutter run         # Start development server (mobile)
+flutter build web   # Build for web production
+flutter test         # Run unit tests
 ```
+
+**Current Flutter Version**: 3.32.5 (Dart 3.8.1)  
+**Update Frequency**: Check for updates weekly with `flutter upgrade`
 
 ### Legacy React Development (Deprecated - Migrated to Flutter)
 ```bash

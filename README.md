@@ -213,6 +213,10 @@ Face Encoding → Clustering → Person Assignment → Friend Analysis
 
 3. **Required Tools**
    ```bash
+   # Install Flutter (latest version)
+   # https://docs.flutter.dev/get-started/install
+   flutter upgrade  # Ensure latest version
+   
    # Install Node.js and npm
    # https://nodejs.org/
    
@@ -222,6 +226,9 @@ Face Encoding → Clustering → Person Assignment → Friend Analysis
    # Install Terraform
    # https://learn.hashicorp.com/tutorials/terraform/install-cli
    ```
+
+   **Flutter Version**: 3.32.5+ (Current: 3.32.5)  
+   **Dart Version**: 3.8.1+
 
 4. **Authentication**
    ```bash
