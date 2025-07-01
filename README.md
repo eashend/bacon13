@@ -1,38 +1,179 @@
-# Bacon13 App - Firebase Frontend-Only Architecture
+# Bacon13 - Intelligent Photo Sharing App
 
-A social media application built with React TypeScript frontend using Firebase services directly - no backend required!
+A cross between Google Photos and Instagram with AI-powered facial detection, automatic person recognition, and friend suggestions based on photo co-appearance frequency. Built with Flutter and Firebase.
 
-## Architecture
+## 🎯 Vision
+A hybrid of Google Photos and Instagram that automatically detects faces in uploaded photos, organizes them by people, and suggests friendships based on photo co-appearance frequency.
 
-- **Frontend**: React TypeScript with Tailwind CSS
+## 🏗️ Current Architecture
+
+- **Frontend**: Flutter (Mobile-first, cross-platform)
 - **Authentication**: Firebase Authentication
 - **Database**: Firestore (NoSQL document database)
 - **Storage**: Firebase Storage for images
-- **Hosting**: Firebase Hosting
+- **Hosting**: Firebase Hosting (Web deployment)
 - **Infrastructure**: Terraform for Firebase resource provisioning
+- **ML/AI**: Google Vision AI (planned) for facial detection
+- **Processing**: Cloud Functions for serverless ML pipeline
 
-## Features
+## 🚀 Features
 
-### Must Have (MVP)
-- ✅ User registration and login with Firebase Auth
-- ✅ Image post uploads to Firebase Storage
-- ✅ View own posts in reverse chronological order
-- ✅ Public feed with latest posts
-- ✅ Real-time data synchronization with Firestore
-- ✅ Responsive UI with Tailwind CSS
-- ✅ Firebase Hosting deployment
+### ✅ Current Features (MVP Complete)
+- User registration and login with Firebase Auth
+- Photo uploads to Firebase Storage
+- View personal posts and public feed
+- Real-time data synchronization with Firestore
+- Flutter Material Design UI (iOS, Android, Web)
+- Firebase Hosting deployment
+- Comprehensive test coverage (27 unit tests)
 
-### Should Have
-- 🔄 Real-time notifications
-- 🔄 User profile customization
-- 🔄 Image compression and optimization
+### 🔄 Next Phase: AI & Social Features
+- **Facial Detection**: Automatic face detection in uploaded photos
+- **Person Recognition**: Cluster similar faces into person entities
+- **Smart Organization**: Auto-generate albums by person
+- **Friend Suggestions**: ML-powered suggestions based on photo co-appearance
+- **Social Graph**: Build relationships through shared photos
+- **Privacy Controls**: Granular consent and data management
 
-### Could Have
-- 🔄 Social features (likes, comments)
-- 🔄 Pagination/lazy loading
-- 🔄 Advanced search and filters
+---
 
-## Frontend Features
+## 📋 Implementation Roadmap
+
+### **Phase 1: Core ML Infrastructure** (Weeks 1-3)
+
+#### **1.1 Facial Detection Service**
+- **Technology**: Google Vision AI or AWS Rekognition
+- **Integration**: Cloud Functions for serverless processing
+- **Workflow**: Photo upload → Face detection → Store face coordinates
+- **Data Storage**: Face bounding boxes, confidence scores
+
+#### **1.2 Face Recognition Pipeline**
+- **Face Encoding**: Generate 128-dimensional face embeddings
+- **Storage**: Firestore collection for face vectors
+- **Clustering**: Group similar faces using cosine similarity
+- **Person Creation**: Auto-create "Person" entities from clusters
+
+#### **1.3 Enhanced Data Models**
+```typescript
+Person {
+  id: string
+  name?: string  // User-assigned or null for unknown
+  faceCount: number
+  representativeFaceId: string
+  createdAt: timestamp
+  isVerified: boolean
+}
+
+Photo {
+  id: string
+  userId: string
+  imageUrl: string
+  faces: FaceDetection[]
+  people: string[]  // Person IDs detected
+  location?: GeoPoint
+  createdAt: timestamp
+  processedAt?: timestamp
+}
+
+FaceDetection {
+  personId?: string
+  boundingBox: {x, y, width, height}
+  confidence: number
+  embedding: number[]  // 128-dim vector
+}
+```
+
+### **Phase 2: Friend Suggestion Algorithm** (Weeks 4-5)
+
+#### **2.1 Co-appearance Analysis**
+- **Frequency Tracking**: Count photos where two people appear together
+- **Relationship Scoring**: Weight by recency and photo count
+- **Mutual Friends**: Boost scores for people with mutual connections
+
+#### **2.2 Friend Suggestion Logic**
+```typescript
+FriendSuggestion {
+  suggestedPersonId: string
+  confidence: number
+  sharedPhotoCount: number
+  recentInteractions: number
+  mutualFriends: number
+  reason: "frequent_photos" | "mutual_friends" | "recent_activity"
+}
+```
+
+#### **2.3 Social Graph**
+- **Friendship Model**: Bidirectional relationships
+- **Privacy Levels**: Public, friends-only, private photos
+- **User Controls**: Block suggestions, manual friend requests
+
+### **Phase 3: Advanced Photo Features** (Weeks 6-8)
+
+#### **3.1 Smart Organization**
+- **People Albums**: Auto-generated albums per person
+- **Timeline View**: Chronological photo browsing
+- **Search by Person**: "Show me all photos with John"
+- **Bulk Actions**: Tag/organize multiple photos
+
+#### **3.2 Social Features**
+- **Photo Tagging**: User confirms/corrects person identification
+- **Sharing**: Send specific person's photos to them
+- **Collaborative Albums**: Shared albums with auto-contribution
+- **Memory Prompts**: "1 year ago with Sarah"
+
+### **Phase 4: Privacy & User Experience** (Weeks 9-10)
+
+#### **4.1 Privacy Framework**
+- **Consent Management**: Explicit opt-in for face detection
+- **Data Control**: Delete face data, opt-out options
+- **GDPR Compliance**: Data export, deletion rights
+- **Biometric Data Protection**: Encrypted face embeddings
+
+#### **4.2 UI/UX Enhancements**
+- **Person Management**: Name, merge, split person clusters
+- **Friend Suggestions UI**: Swipe to accept/reject suggestions
+- **Photo Review**: Confirm face detections before processing
+- **Settings**: Granular privacy controls
+
+### **ML Pipeline Architecture**
+```
+Photo Upload → Cloud Function → Vision AI → Face Extraction → 
+Face Encoding → Clustering → Person Assignment → Friend Analysis
+```
+
+### **Technology Stack Additions**
+- **Face Detection**: Google Vision AI / AWS Rekognition
+- **Face Recognition**: TensorFlow Lite / MediaPipe
+- **Vector Similarity**: Firestore with custom indexing
+- **Background Processing**: Cloud Functions
+- **Batch Processing**: Cloud Run for bulk operations
+
+### **Database Schema Updates**
+```typescript
+// New Firestore collections
+/users/{userId}/people/{personId}
+/users/{userId}/photos/{photoId}/faces/{faceId}
+/users/{userId}/friendships/{friendshipId}
+/users/{userId}/suggestions/{suggestionId}
+/users/{userId}/privacy-settings
+```
+
+### **Privacy & Security Considerations**
+- Face embeddings encrypted at rest
+- No raw facial images stored beyond original photos
+- User consent required for facial processing
+- GDPR compliance with data export/deletion tools
+- Granular privacy controls for photo sharing
+
+### **Success Metrics**
+- Face detection accuracy > 95%
+- Person clustering precision > 90%
+- Friend suggestion acceptance rate > 30%
+- Photo processing time < 10 seconds
+
+---
+
+## 🛠️ Current Flutter Features
 
 ### Authentication
 - Email/password registration and login
@@ -91,7 +232,7 @@ A social media application built with React TypeScript frontend using Firebase s
    gcloud auth application-default login
    ```
 
-## Quick Deployment
+## 🚀 Quick Deployment
 
 1. **Clone and Setup**
    ```bash
@@ -102,21 +243,32 @@ A social media application built with React TypeScript frontend using Firebase s
 
 2. **Configure Firebase**
    ```bash
-   # Create frontend/.env file with your Firebase config
-   cp frontend/.env.example frontend/.env
-   # Edit with your Firebase project credentials
+   # Update flutter_app/lib/firebase_options.dart with your Firebase config
+   # Or use FlutterFire CLI: flutterfire configure
    ```
 
 3. **Deploy to Firebase**
    ```bash
-   ./deploy.sh YOUR_GCP_PROJECT_ID us-central1 dev
+   # Authenticate first
+   firebase login
+   
+   # Deploy using the script
+   ./deploy.sh bacon13 us-central1 dev
    ```
 
    This script will:
    - Enable required Firebase APIs
    - Deploy infrastructure with Terraform
    - Deploy Firestore and Storage security rules
-   - Build and deploy frontend to Firebase Hosting
+   - Build Flutter web app and deploy to Firebase Hosting
+
+4. **Manual Deploy** (Alternative)
+   ```bash
+   cd flutter_app
+   flutter build web
+   cd ..
+   firebase deploy --only hosting
+   ```
 
 ## Manual Deployment
 
@@ -188,13 +340,14 @@ REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
 REACT_APP_FIREBASE_APP_ID=your-app-id
 ```
 
-### Local Development
+### 🛠️ Local Development
 
-### 1. Frontend Setup
+### 1. Flutter Setup
 ```bash
-cd frontend
-npm install
-npm start
+cd flutter_app
+flutter pub get
+flutter run -d web      # For web development
+flutter run             # For mobile (requires emulator/device)
 ```
 
 ### 2. Firebase Emulation (Optional)
@@ -203,9 +356,16 @@ npm start
 npm install -g firebase-tools
 firebase emulators:start
 
-# In another terminal, run frontend with emulator
-export REACT_APP_USE_EMULATOR=true
-cd frontend && npm start
+# In another terminal, configure Flutter for emulator
+# Update firebase_options.dart to use localhost URLs
+cd flutter_app && flutter run -d web
+```
+
+### 3. Testing
+```bash
+cd flutter_app
+flutter test            # Run all unit tests (27 tests)
+flutter build web       # Verify production build
 ```
 
 ## Monitoring and Logs
