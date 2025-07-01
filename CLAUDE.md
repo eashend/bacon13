@@ -35,7 +35,8 @@ Bacon13 is a social media application with a mobile-first Flutter architecture u
 2. **Run tests** to ensure all tests pass
 3. **Build the project** to verify it compiles successfully  
 4. **Fix any failing tests or build errors**
-5. **Then commit and push** to GitHub
+5. **Never commit secrets** - Use environment variables for Firebase configuration
+6. **Then commit and push** to GitHub
 
 ```bash
 # Flutter Development Workflow
@@ -61,17 +62,24 @@ git push origin main
 ## Development Commands
 
 ### Flutter Development
+
+**SECURITY**: Always use environment variables for Firebase configuration. Never commit API keys to git.
+
 ```bash
 # Setup and maintenance
 flutter upgrade     # Always use latest Flutter version
 flutter doctor      # Verify Flutter installation
 
+# Setup Firebase secrets (REQUIRED)
+cp .env.template .env  # Copy template
+# Edit .env with real Firebase configuration (NEVER commit this file)
+
 cd flutter_app
-flutter pub get     # Install dependencies  
-flutter run -d web  # Start development server (web)
-flutter run         # Start development server (mobile)
-flutter build web   # Build for web production
-flutter test         # Run unit tests
+flutter pub get              # Install dependencies  
+flutter run -d web           # Start development server (web)
+flutter run                  # Start development server (mobile)
+./build_with_secrets.sh web  # Secure build for web production
+flutter test                 # Run unit tests
 ```
 
 **Current Flutter Version**: 3.32.5 (Dart 3.8.1)  
@@ -99,33 +107,39 @@ export REACT_APP_USE_EMULATOR=true
 cd frontend && npm start
 ```
 
-### Firebase Configuration
+### Firebase Configuration (SECURE)
+
+**CRITICAL SECURITY**: Firebase configuration is now loaded from environment variables. API keys are NEVER committed to git.
+
 ```bash
-# Create .env file in frontend/ directory
-REACT_APP_FIREBASE_API_KEY=your-api-key
-REACT_APP_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-REACT_APP_FIREBASE_PROJECT_ID=your-project-id
-REACT_APP_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
-REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
-REACT_APP_FIREBASE_APP_ID=your-app-id
+# 1. Copy environment template
+cp .env.template .env
+
+# 2. Edit .env with your Firebase project configuration
+# Get configuration from: firebase apps:sdkconfig
+FIREBASE_API_KEY=your-web-api-key-here
+FIREBASE_APP_ID=your-web-app-id-here
+FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id-here
+FIREBASE_PROJECT_ID=your-project-id-here
+FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
+FIREBASE_STORAGE_BUCKET=your-project-id.firebasestorage.app
+
+# 3. The .env file is automatically ignored by git
+# 4. Flutter app loads secrets via String.fromEnvironment()
 ```
 
-### Deployment
+### Deployment (SECURE)
 ```bash
-# Deploy Firebase infrastructure and frontend
-./deploy.sh YOUR_GCP_PROJECT_ID us-central1 dev
+# SECURE deployment with environment variables
+./deploy_secure.sh YOUR_GCP_PROJECT_ID us-central1 prod
 
-# Manual deployment steps:
-# 1. Deploy infrastructure
-cd infrastructure && terraform apply
+# OR manual secure deployment:
+# 1. Ensure .env file exists with Firebase configuration
+# 2. Build with secrets
+cd flutter_app && ./build_with_secrets.sh web
 
-# 2. Deploy Firebase rules
-firebase deploy --only firestore:rules
-firebase deploy --only storage
-
-# 3. Deploy frontend
-cd frontend && npm run build
-firebase deploy --only hosting
+# 3. Deploy to Firebase
+firebase deploy --only hosting,firestore:rules,storage
 ```
 
 ## Key Components
