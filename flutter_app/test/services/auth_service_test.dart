@@ -84,6 +84,7 @@ void main() {
         final user = UserModel(
           id: 'test-id',
           email: 'test@example.com',
+          username: 'test_user',
           createdAt: now,
           updatedAt: now,
           profileImages: [],

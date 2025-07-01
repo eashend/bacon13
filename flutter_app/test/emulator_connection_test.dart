@@ -41,7 +41,9 @@ void main() {
         // This should work if emulator is running
         final result = await authService.createUserWithEmailAndPassword(
           testEmail, 
-          testPassword
+          testPassword,
+          'emulator_test_user',
+          'https://example.com/face.jpg'
         );
         
         expect(result, isNotNull);
@@ -98,7 +100,9 @@ void main() {
         // Create user with auth service (should also create Firestore profile)
         final result = await authService.createUserWithEmailAndPassword(
           testEmail, 
-          testPassword
+          testPassword,
+          'emulator_test_user',
+          'https://example.com/face.jpg'
         );
         
         expect(result, isNotNull);
@@ -148,7 +152,7 @@ void main() {
         const validPassword = 'validPassword123';
         
         expect(
-          () => authService.createUserWithEmailAndPassword(invalidEmail, validPassword),
+          () => authService.createUserWithEmailAndPassword(invalidEmail, validPassword, 'test_user', 'https://example.com/face.jpg'),
           throwsA(isA<String>())
         );
         
@@ -159,7 +163,7 @@ void main() {
         const weakPassword = '123';
         
         expect(
-          () => authService.createUserWithEmailAndPassword(validEmail, weakPassword),
+          () => authService.createUserWithEmailAndPassword(validEmail, weakPassword, 'test_user', 'https://example.com/face.jpg'),
           throwsA(isA<String>())
         );
         

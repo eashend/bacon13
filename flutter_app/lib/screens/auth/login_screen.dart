@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
-import 'register_screen.dart';
+import 'enhanced_register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -159,7 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => RegisterScreen()),
+                      MaterialPageRoute(builder: (context) => const EnhancedRegisterScreen()),
                     );
                   },
                   child: Text("Don't have an account? Sign up"),

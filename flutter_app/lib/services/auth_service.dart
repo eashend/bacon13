@@ -1,11 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
 import '../models/user_model.dart';
 
 class AuthService extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   User? get currentUser => _auth.currentUser;
   UserModel? _userProfile;
@@ -56,7 +59,12 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<UserCredential?> createUserWithEmailAndPassword(String email, String password) async {
+  Future<UserCredential?> createUserWithEmailAndPassword(
+    String email, 
+    String password, 
+    String username, 
+    String facePhotoUrl,
+  ) async {
     try {
       _isLoading = true;
       notifyListeners();
@@ -66,9 +74,9 @@ class AuthService extends ChangeNotifier {
         password: password,
       );
 
-      // Create user profile in Firestore
+      // Create user profile in Firestore with enhanced data
       if (result.user != null) {
-        await _createUserProfile(result.user!);
+        await _createUserProfile(result.user!, username, facePhotoUrl);
       }
 
       return result;
@@ -80,15 +88,18 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<void> _createUserProfile(User user) async {
+  Future<void> _createUserProfile(User user, String username, String facePhotoUrl) async {
     try {
       final now = DateTime.now();
       final userProfile = UserModel(
         id: user.uid,
         email: user.email ?? '',
+        username: username,
+        facePhotoUrl: facePhotoUrl,
         createdAt: now,
         updatedAt: now,
         profileImages: [],
+        hasVerifiedFace: true, // Set to true since they uploaded a face photo
       );
 
       await _firestore
@@ -128,6 +139,33 @@ class AuthService extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error updating user profile: $e');
+    }
+  }
+
+  Future<bool> isUsernameAvailable(String username) async {
+    try {
+      final query = await _firestore
+          .collection('users')
+          .where('username', isEqualTo: username.toLowerCase())
+          .limit(1)
+          .get();
+      
+      return query.docs.isEmpty;
+    } catch (e) {
+      debugPrint('Error checking username availability: $e');
+      return false;
+    }
+  }
+
+  Future<String> uploadFacePhoto(File imageFile, String userId) async {
+    try {
+      final ref = _storage.ref().child('profile/$userId/face_photo.jpg');
+      final uploadTask = await ref.putFile(imageFile);
+      final downloadUrl = await uploadTask.ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      debugPrint('Error uploading face photo: $e');
+      throw 'Failed to upload photo. Please try again.';
     }
   }
 
